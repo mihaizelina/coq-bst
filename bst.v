@@ -66,7 +66,148 @@ Fixpoint occurs (n : nat) (T : tree) : Prop :=
 end.
 
 (* Proofs *)
+
+(* Auxiliary proof that inserting n > n0 into a BST with all elements < n0 preserves the inequality *)
+Theorem grtPreserveBST : forall t : tree, forall n0 : nat, forall n : nat,
+  (grtTree t n0) /\ n > n0 -> (grtTree (insert n t) n0).
+Proof.
+intros.
+destruct H.
+induction t.
+-
+simpl.
+auto.
+-
+simpl.
+case (compare n1 n).
+
+simpl.
+split.
+simpl in H.
+intuition.
+
+split.
+simpl in H.
+intuition.
+simpl in H.
+intuition.
+
+simpl.
+split.
+simpl in H.
+intuition.
+split.
+simpl in H.
+intuition.
+destruct H.
+destruct H1.
+apply IHt2.
+intuition.
+
+simpl.
+simpl in H.
+intuition.
+Qed.
+
+(* Analog proof for n < n0 *)
+Theorem lessPreserveBST : forall t : tree, forall n0 : nat, forall n : nat, 
+  (lessTree t n0) /\ n < n0 -> (lessTree (insert n t) n0).
+Proof.
+intros.
+destruct H.
+induction t.
+-
+simpl.
+auto.
+-
+simpl.
+case (compare n1 n).
+
+simpl.
+split.
+simpl in H.
+intuition.
+
+split.
+simpl in H.
+intuition.
+simpl in H.
+intuition.
+
+simpl.
+split.
+simpl in H.
+intuition.
+split.
+simpl in H.
+intuition.
+destruct H.
+destruct H1.
+apply IHt2.
+intuition.
+
+simpl.
+simpl in H.
+intuition.
+Qed.
+
+
 Theorem insertBST : forall t : tree, forall n : nat, bst t -> bst (insert n t).
+Proof.
+intros.
+induction t.
+- 
+simpl.
+auto.
+- 
+simpl.
+case (compare n0 n) eqn:Heqe.
+
+simpl.
+split.
+simpl in H.
+destruct H.
+intuition.
+split.
+simpl in H.
+intuition.
+split.
+simpl in H.
+intuition.
+simpl in H.
+intuition.
+
+simpl in H.
+split.
+intuition.
+
+split.
+apply IHt2.
+intuition.
+split.
+intuition.
+
+apply nat_compare_lt in Heqe.
+assert (grtTree t2 n0 /\ n > n0).
+intuition.
+apply grtPreserveBST in H0.
+intuition.
+
+simpl.
+split.
+apply IHt1.
+simpl in H.
+intuition.
+
+simpl in H.
+firstorder.
+apply lessPreserveBST.
+intuition.
+apply nat_compare_gt in Heqe.
+omega.
+Qed.
+
+
 
 Theorem sortPreservesBST : forall t : tree, bst (sort t).
 
