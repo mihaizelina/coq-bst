@@ -65,7 +65,8 @@ Fixpoint occurs (n : nat) (T : tree) : Prop :=
   | node lt k rt => (k = n) \/ (occurs n lt) \/ (occurs n rt)
 end.
 
-(* Proofs *)
+
+(* Proofs for Part 1 *)
 
 (* Auxiliary proof that inserting n > n0 into a BST with all elements < n0 preserves the inequality *)
 Theorem grtPreserveBST : forall t : tree, forall n0 : nat, forall n : nat,
@@ -80,33 +81,48 @@ auto.
 -
 simpl.
 case (compare n1 n).
-
+(* Current node *)
 simpl.
-split.
 simpl in H.
-intuition.
-
-split.
-simpl in H.
-intuition.
-simpl in H.
-intuition.
-
+trivial.
+(* Right subtree (greater) *)
 simpl.
-split.
 simpl in H.
-intuition.
+intuition. (* Each disjunct corresponds to a conclusion *)
+
+(** Complete proof:
 split.
-simpl in H.
-intuition.
+destruct H.
+trivial.
+
+split.
 destruct H.
 destruct H1.
-apply IHt2.
-intuition.
+trivial.
 
+destruct H.
+apply IHt2.
+destruct H1.
+trivial. *)
+(* Left subtree (less) *)
 simpl.
 simpl in H.
 intuition.
+
+(** Complete proof:
+split.
+destruct H.
+trivial.
+
+split.
+destruct H.
+destruct H1.
+apply IHt1.
+trivial.
+
+destruct H.
+destruct H1.
+trivial. *)
 Qed.
 
 (* Analog proof for n < n0 *)
@@ -122,35 +138,19 @@ auto.
 -
 simpl.
 case (compare n1 n).
-
+(* Current node *)
 simpl.
-split.
 simpl in H.
 intuition.
-
-split.
-simpl in H.
-intuition.
-simpl in H.
-intuition.
-
+(* Right subtree (greater) *)
 simpl.
-split.
 simpl in H.
 intuition.
-split.
-simpl in H.
-intuition.
-destruct H.
-destruct H1.
-apply IHt2.
-intuition.
-
+(* Left subtree (less) *)
 simpl.
 simpl in H.
 intuition.
 Qed.
-
 
 Theorem insertBST : forall t : tree, forall n : nat, bst t -> bst (insert n t).
 Proof.
@@ -204,7 +204,7 @@ firstorder.
 apply lessPreserveBST.
 intuition.
 apply nat_compare_gt in Heqe.
-omega.
+intuition.
 Qed.
 
 
