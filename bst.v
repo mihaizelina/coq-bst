@@ -67,11 +67,25 @@ end.
 
 (* Proofs *)
 Theorem insertBST : forall t : tree, forall n : nat, bst t -> bst (insert n t).
+Admitted.
 
 Theorem sortPreservesBST : forall t : tree, bst (sort t).
+intros.
+induction t.
+simpl.
+auto.
+unfold sort.
+simpl.
+apply insertBST.
+induction (treeToList t1 ++ treeToList t2). 
+unfold listToBST.
+simpl.
+auto.
+simpl.
+apply insertBST.
+intuition.
+Qed.
 
 Theorem occursBST : forall n : nat, forall t : tree, occurs n t <-> occurs n (sort t).
-
-
 
 
