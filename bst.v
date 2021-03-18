@@ -3,6 +3,7 @@ Require Import Arith.
 Require Import Nat.
 Require Import List.
 Require Import Omega.
+Require Import Lia.
 
 (* Definition of basic binary tree *)
 Inductive tree : Set :=
@@ -75,54 +76,24 @@ Proof.
 intros.
 destruct H.
 induction t.
--
+- (* Base case *)
 simpl.
 auto.
--
+- (* Step case *)
 simpl.
 case (compare n1 n).
 (* Current node *)
-simpl.
-simpl in H.
-trivial.
+  simpl.
+  simpl in H.
+  trivial.
 (* Right subtree (greater) *)
-simpl.
-simpl in H.
-intuition. (* Each disjunct corresponds to a conclusion *)
-
-(** Complete proof:
-split.
-destruct H.
-trivial.
-
-split.
-destruct H.
-destruct H1.
-trivial.
-
-destruct H.
-apply IHt2.
-destruct H1.
-trivial. *)
+  simpl.
+  simpl in H.
+  intuition.
 (* Left subtree (less) *)
-simpl.
-simpl in H.
-intuition.
-
-(** Complete proof:
-split.
-destruct H.
-trivial.
-
-split.
-destruct H.
-destruct H1.
-apply IHt1.
-trivial.
-
-destruct H.
-destruct H1.
-trivial. *)
+  simpl.
+  simpl in H.
+  intuition.
 Qed.
 
 (* Analog proof for n < n0 *)
@@ -132,34 +103,34 @@ Proof.
 intros.
 destruct H.
 induction t.
--
+- (* Base case *)
 simpl.
 auto.
--
+- (* Step case *)
 simpl.
 case (compare n1 n).
 (* Current node *)
-simpl.
-simpl in H.
-intuition.
+  simpl.
+  simpl in H.
+  intuition.
 (* Right subtree (greater) *)
-simpl.
-simpl in H.
-intuition.
+  simpl.
+  simpl in H.
+  intuition.
 (* Left subtree (less) *)
-simpl.
-simpl in H.
-intuition.
+  simpl.
+  simpl in H.
+  intuition.
 Qed.
 
 Theorem insertBST : forall t : tree, forall n : nat, bst t -> bst (insert n t).
 Proof.
 intros.
 induction t.
-- 
+- (* Base case *)
 simpl.
 auto.
-- 
+- (* Step case *)
 simpl.
 case (compare n0 n) eqn:Heqe.
 
@@ -209,9 +180,8 @@ Qed.
 
 Theorem insertPreservation : forall t : tree, forall n : nat, forall a : nat, occurs n t \/ n = a <-> occurs n (insert a t).
 Proof.
-unfold iff. 
-split.
-intros.
+unfold iff.
+split; intros.
 - (* => *)
 induction t.
 (* Base case *)
@@ -229,6 +199,7 @@ apply nat_compare_lt in Heqe2.
 intuition.
 apply nat_compare_eq in Heqe1.
 intuition.
+simpl in H.
 destruct H.
 simpl in H.
 destruct H.
@@ -245,7 +216,7 @@ right.
 left.
 apply nat_compare_gt in Heqe2.
 apply nat_compare_eq in Heqe1.
-omega.
+lia.
 (* Right subtree (greater) *)
 simpl.
 case (compare n0 n) eqn:Heqe2.
@@ -282,9 +253,7 @@ trivial.
 intuition.
 simpl in H0.
 intuition.
-
 - (* <= *)
-intros.
 induction t.
 (* Base case *)
 simpl in H.
@@ -297,7 +266,7 @@ case (compare n0 n) eqn:Heqe2 in H.
 right.
 apply nat_compare_eq in Heqe1.
 apply nat_compare_eq in Heqe2.
-omega.
+lia.
 
 left.
 simpl.
@@ -381,7 +350,6 @@ right.
 apply H.
 Qed.
 
-
 Theorem sortPreservesBST : forall t : tree, bst (sort t).
 intros.
 induction t.
@@ -399,14 +367,12 @@ apply insertBST.
 intuition.
 Qed.
 
-
-Theorem occursBSTfromList : forall n : nat, forall l : list nat, In n l <-> occurs n (listToBST l).
+Theorem occursBSTFromList : forall n : nat, forall l : list nat, In n l <-> occurs n (listToBST l).
 Proof.
 intros.
 unfold iff.
-split.
--
-intros.
+split; intros.
+- (* => *)
 induction l.
 (* Base case *)
 simpl.
@@ -421,8 +387,7 @@ intuition.
 apply IHl in H.
 left.
 apply H.
--
-intros.
+- (* <= *)
 induction l.
 (* Base case *)
 intuition.
@@ -438,37 +403,110 @@ left.
 intuition.
 Qed.
 
+(* All elements are preserved after transformation *)
+Theorem BSTToListPreservation : forall l : list nat, forall n : nat, In n l <-> occurs n (listToBST l).
+Proof.
+intros.
+unfold iff.
+split; intros.
+- (* => *)
+induction l.
+(* Base case *)
+intuition.
+(* Step case *)
+simpl.
+simpl in H.
+apply insertPreservation.
+intuition.
+- (* <= *)
+induction l.
+(* Base case *)
+intuition.
+(* Step case *)
+simpl.
+simpl in H.
+apply insertPreservation in H.
+intuition.
+Qed.
+
+(* All elements are preserved after transformation *)
+Theorem ListToBSTPreservation : forall t : tree, forall n : nat, occurs n t <-> In n (treeToList t).
+Proof.
+intros.
+unfold iff.
+split; intros.
+- (* => *)
+induction t.
+(* Base case *)
+intuition.
+(* Step case *)
+simpl.
+simpl in H.
+case (compare n0 n) eqn:Heqe1 in H.
+apply nat_compare_eq in Heqe1.
+left.
+apply Heqe1.
+right.
+apply nat_compare_lt in Heqe1.
+apply in_or_app.
+destruct H.
+lia.
+intuition.
+apply nat_compare_gt in Heqe1.
+destruct H.
+lia.
+intuition.
+- (* <= *)
+induction t.
+(* Base case *)
+intuition.
+(* Step case *)
+simpl.
+case (compare n0 n) eqn:Heqe1 in H.
+apply nat_compare_eq in Heqe1.
+left.
+lia.
+right.
+simpl in H.
+destruct H.
+apply nat_compare_lt in Heqe1.
+lia.
+apply in_app_or in H.
+intuition.
+apply nat_compare_gt in Heqe1.
+simpl in H.
+destruct H.
+lia.
+apply in_app_or in H.
+intuition.
+Qed.
+
 Theorem occursBST : forall n : nat, forall t : tree, occurs n t <-> occurs n (sort t).
 Proof.
 intros.
 unfold iff.
-split.
-- (* '=>' *)
-intros.
+split; intros.
+- (* => *)
 induction t.
 (* Base case *)
 simpl.
 intuition.
 (* Step case *)
 unfold sort.
-Admitted.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+apply BSTToListPreservation.
+apply ListToBSTPreservation.
+apply H.
+- (* <= *)
+induction t.
+(* Base case *)
+simpl.
+intuition.
+(* Step case *)
+unfold sort in H.
+apply BSTToListPreservation in H.
+apply ListToBSTPreservation in H.
+apply H.
+Qed.
 
 
 
