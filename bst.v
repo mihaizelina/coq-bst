@@ -123,6 +123,7 @@ case (compare n1 n).
   intuition.
 Qed.
 
+
 Theorem insertBST : forall t : tree, forall n : nat, bst t -> bst (insert n t).
 Proof.
 intros.
@@ -177,6 +178,7 @@ intuition.
 apply nat_compare_gt in Heqe.
 intuition.
 Qed.
+
 
 Theorem insertPreservation : forall t : tree, forall n : nat, forall a : nat, occurs n t \/ n = a <-> occurs n (insert a t).
 Proof.
@@ -350,6 +352,7 @@ right.
 apply H.
 Qed.
 
+
 Theorem sortPreservesBST : forall t : tree, bst (sort t).
 intros.
 induction t.
@@ -366,6 +369,7 @@ simpl.
 apply insertBST.
 intuition.
 Qed.
+
 
 Theorem occursBSTFromList : forall n : nat, forall l : list nat, In n l <-> occurs n (listToBST l).
 Proof.
@@ -481,6 +485,7 @@ apply in_app_or in H.
 intuition.
 Qed.
 
+
 Theorem occursBST : forall n : nat, forall t : tree, occurs n t <-> occurs n (sort t).
 Proof.
 intros.
@@ -507,6 +512,148 @@ apply BSTToListPreservation in H.
 apply ListToBSTPreservation in H.
 apply H.
 Qed.
+
+
+(* Definitions for Part 2 *)
+
+Function optMin (n : nat) (m : option nat) : nat :=
+  match m with
+  | None => n
+  | Some k => (min n k)
+  end.
+
+Fixpoint treeMin (t : tree) : option nat :=
+  match t with
+  | leaf => None
+  | node lt k rt => Some (optMin (optMin k (treeMin lt) ) (treeMin rt))
+end.
+
+Fixpoint leftmost (t : tree) : option nat :=
+  match t with
+  | leaf => None
+  | node lt k rt => match lt with
+      | leaf => Some k
+      | node lt1 k1 rt1 => leftmost lt
+  end
+end.
+
+Fixpoint search (n : nat) (t : tree) : Prop :=
+  match t with
+  | leaf => False
+  | node lt k rt => match (compare n k) with 
+      | Eq => True
+      | Lt => search n lt
+      | Gt => search n rt
+  end
+end.
+
+
+(* Proofs for Part 2 *)
+
+(* The optMin method returns one of its arguments *)
+Theorem optMinLemma : forall a : nat, forall b : nat, forall r : nat, (optMin a (Some b)) = r -> r = a \/ r = b.
+Proof.
+intros.
+simpl in H.
+lia.
+Qed.
+
+Theorem trivialMinComp : forall a : nat, forall b : nat, min a b = a -> a <= b.
+Proof.
+intros.
+lia.
+Qed.
+
+(* The minimal element belongs to the tree *)
+Theorem minInTree : forall t : tree, forall m : nat, treeMin t = Some m -> occurs m t.
+Proof.
+intros.
+induction t; simpl in H.
+- (* Base case *)
+simpl. discriminate.
+- (* Step case *)
+case_eq (treeMin t1).
+intros n1 Ht1.
+rewrite Ht1 in H.
+case_eq (treeMin t2).
+intros n2 Ht2.
+rewrite Ht2 in H.
+simpl in H.
+inversion H. rewrite -> H1.
+apply optMinLemma in H1.
+destruct H1; simpl.
+  apply eq_sym in H0.
+  apply optMinLemma in H0.
+  destruct H0.
+  lia.
+  apply eq_sym in H0.
+  rewrite H0 in Ht1.
+  apply IHt1 in Ht1.
+  right. left. apply Ht1.
+  apply eq_sym in H0.
+  rewrite H0 in Ht2.
+  apply IHt2 in Ht2.
+  right. right. apply Ht2.
+intros.
+rewrite H0 in H.
+inversion H. rewrite -> H2.
+apply optMinLemma in H2.
+destruct H2; simpl.
+  apply eq_sym in H1.
+  lia.
+  apply eq_sym in H1.
+  rewrite H1 in Ht1.
+  apply IHt1 in Ht1.
+  right. left. apply Ht1.
+
+intros.
+rewrite H0 in H.
+inversion H. rewrite H2.
+case_eq (treeMin t2).
+intros n2 Ht2.
+rewrite Ht2 in H.
+rewrite Ht2 in H2.
+apply optMinLemma in H2.
+destruct H2; simpl.
+  lia.
+  apply eq_sym in H1.
+  rewrite H1 in Ht2.
+  apply IHt2 in Ht2.
+  right. right. apply Ht2.
+intros.
+rewrite H1 in H2.
+firstorder.
+Qed.
+
+
+(* The values in all nodes are geq than the minimal value *)
+Theorem allNodesGeqMin : forall t : tree, forall m : nat, forall n : nat, treeMin t = Some m /\ occurs n t -> n >= m.
+Admitted.
+
+(* Minimal element of BST is its leftmost node *)
+Theorem minBSTLeftmost : forall t : tree, bst t -> treeMin t = leftmost t.
+Admitted.
+
+(* Search function is correct *)
+Theorem searchCorrect : forall t : tree, forall n : nat, bst t -> (occurs n t <-> search n t).
+Admitted.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
