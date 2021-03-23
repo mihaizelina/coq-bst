@@ -625,35 +625,184 @@ rewrite H1 in H2.
 firstorder.
 Qed.
 
+(* Theorems needed to place the subtrees in relation to a key *)
+Theorem allRTGrtKey : forall n : nat, forall t : tree, (grtTree t n) -> (forall k, occurs k t -> k > n).
+Proof.
+intros.
+induction t.
+- (* Step case *)
+simpl in H0.
+lia.
+- (* Base case *)
+simpl in H.
+destruct H. destruct H1.
+simpl in H0.
+destruct (compare n0 k) eqn:Heqe2 in H0.
+  + intuition.
+  + intuition.
+  + intuition.
+Qed.
+
+Theorem allLTLessKey : forall n : nat, forall t : tree, (lessTree t n) -> (forall k, occurs k t -> k < n).
+Proof.
+intros.
+induction t.
+- (* Step case *)
+simpl in H0.
+lia.
+- (* Base case *)
+simpl in H.
+destruct H. destruct H1.
+simpl in H0.
+destruct (compare n0 k) eqn:Heqe2 in H0.
+  + intuition.
+  + intuition.
+  + intuition.
+Qed.
+
 
 (* The values in all nodes are geq than the minimal value *)
 Theorem allNodesGeqMin : forall t : tree, forall m : nat, forall n : nat, treeMin t = Some m /\ occurs n t -> n >= m.
+Proof.
+intros.
+intuition.
+induction t; simpl in H1.
+- (* Base case *)
+lia.
+- (* Step case *)
+destruct H1.
+
+rewrite H in H0.
+simpl in H0.
+case_eq (treeMin t1).
+intros n1 Ht1.
+rewrite Ht1 in H0.
+case_eq (treeMin t2).
+intros n2 Ht2.
+rewrite Ht2 in H0.
+simpl in H0.
+inversion H0. rewrite -> H2.
+apply optMinLemma in H2.
+destruct H2.
+  apply eq_sym in H1.
+  rewrite H1 in H0.
+  intuition.
+  apply eq_sym in H1.
+  rewrite H1 in Ht2.
+  apply IHt2 in Ht2.
+  lia.
+  intuition.
 Admitted.
+
+
+
 
 (* Minimal element of BST is its leftmost node *)
 Theorem minBSTLeftmost : forall t : tree, bst t -> treeMin t = leftmost t.
+Proof.
+intros.
+induction t.
+- (* Base case *)
+intuition.
+- (* Step case *)
+assert (bst (node t1 n t2)).
+assumption.
+simpl in H.
+destruct H.
+destruct H1.
+destruct H2.
+assert (forall k, occurs k t1 -> k < n).
+apply allLTLessKey.
+intuition.
+assert (forall k, occurs k t2 -> k > n).
+apply allRTGrtKey.
+intuition.
+case_eq (treeMin (node t1 n t2)).
++ intros.
+  case_eq (treeMin t1).
+  * intros.
+    case_eq (treeMin t2).
+      intros.
+      inversion H6.
+      rewrite H10.
+      rewrite H7 in H10.
+      rewrite H8 in H10.
+      apply optMinLemma in H10.
+      destruct H10.
+        simpl in H9.
+        intuition.
+        apply minInTree in H7.
+        apply H4 in H7.
 Admitted.
 
 (* Search function is correct *)
 Theorem searchCorrect : forall t : tree, forall n : nat, bst t -> (occurs n t <-> search n t).
-Admitted.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Proof.
+intros.
+unfold iff.
+split; intros.
+- (* => *)
+induction t.
+(* Base case *)
+intuition.
+simpl.
+destruct (compare n n0) eqn:Heqe1.
+intuition.
+simpl in H0.
+apply nat_compare_lt in Heqe1.
+intuition.
+  + lia.
+  + simpl in H.
+    destruct H. destruct H1. destruct H2.
+    apply IHt1 in H. apply H. apply H0.
+  + simpl in H.
+    destruct H. destruct H1. destruct H2.
+    assert (forall k, occurs k t2 -> k > n0).
+    apply allRTGrtKey.
+    apply H3.
+    assert (occurs n t2 -> n > n0).
+    apply H4.
+    apply H5 in H0.
+    lia.
+  + simpl in H0.
+    apply nat_compare_gt in Heqe1.
+    intuition.
+    lia.
+    intuition.
+    simpl in H.
+    destruct H. destruct H1. destruct H2.
+    apply IHt2. apply H1.
+    assert (forall k, occurs k t1 -> k < n0).
+    apply allLTLessKey.
+    apply H2.
+    assert (occurs n t1 -> n < n0).
+    apply H4.
+    apply H5 in H0.
+    lia.
+    destruct H.
+    intuition.
+- (* <= *)
+induction t.
+(* Base case *)
+intuition.
+(* Step case *)
+simpl.
+destruct (compare n n0) eqn:Heqe1.
+  + apply nat_compare_eq in Heqe1. intuition.
+  + right.
+    simpl in H.
+    destruct H. destruct H1. destruct H2.
+    intuition.
+    simpl in H0.
+    rewrite Heqe1 in H0.
+    apply H4 in H0.
+    intuition.
+  + right.
+    simpl in H.
+    destruct H. destruct H1. destruct H2.
+    intuition.
+    simpl in H0.
+    rewrite Heqe1 in H0.
+    apply H5 in H0.
+    intuition.
+Qed.
