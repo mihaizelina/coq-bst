@@ -82,16 +82,13 @@ auto.
 - (* Step case *)
 simpl.
 case (compare n1 n).
-(* Current node *)
-  simpl.
++ simpl.
   simpl in H.
   trivial.
-(* Right subtree (greater) *)
-  simpl.
++ simpl.
   simpl in H.
   intuition.
-(* Left subtree (less) *)
-  simpl.
++ simpl.
   simpl in H.
   intuition.
 Qed.
@@ -109,16 +106,13 @@ auto.
 - (* Step case *)
 simpl.
 case (compare n1 n).
-(* Current node *)
-  simpl.
++ simpl.
+  simpl in H.
+  trivial.
++ simpl.
   simpl in H.
   intuition.
-(* Right subtree (greater) *)
-  simpl.
-  simpl in H.
-  intuition.
-(* Left subtree (less) *)
-  simpl.
++ simpl.
   simpl in H.
   intuition.
 Qed.
@@ -127,56 +121,48 @@ Qed.
 Theorem insertBST : forall t : tree, forall n : nat, bst t -> bst (insert n t).
 Proof.
 intros.
-induction t.
+induction t; simpl.
 - (* Base case *)
-simpl.
 auto.
 - (* Step case *)
-simpl.
 case (compare n0 n) eqn:Heqe.
-
-simpl.
-split.
-simpl in H.
-destruct H.
-intuition.
-split.
-simpl in H.
-intuition.
-split.
-simpl in H.
-intuition.
-simpl in H.
-intuition.
-
-simpl in H.
-split.
-intuition.
-
-split.
-apply IHt2.
-intuition.
-split.
-intuition.
-
-apply nat_compare_lt in Heqe.
-assert (grtTree t2 n0 /\ n > n0).
-intuition.
-apply grtPreserveBST in H0.
-intuition.
-
-simpl.
-split.
-apply IHt1.
-simpl in H.
-intuition.
-
-simpl in H.
-firstorder.
-apply lessPreserveBST.
-intuition.
-apply nat_compare_gt in Heqe.
-intuition.
++ simpl.
+  split.
+  simpl in H.
+  destruct H.
+  intuition.
+  split.
+  simpl in H.
+  intuition.
+  split.
+  simpl in H.
+  intuition.
+  simpl in H.
+  intuition.
++ simpl in H.
+  split.
+  intuition.
+  split.
+  apply IHt2.
+  intuition.
+  split.
+  intuition.
+  apply nat_compare_lt in Heqe.
+  assert (grtTree t2 n0 /\ n > n0).
+  intuition.
+  apply grtPreserveBST in H0.
+  intuition.
++ simpl.
+  split.
+  apply IHt1.
+  simpl in H.
+  intuition.
+  simpl in H.
+  firstorder.
+  apply lessPreserveBST.
+  intuition.
+  apply nat_compare_gt in Heqe.
+  intuition.
 Qed.
 
 
@@ -185,171 +171,149 @@ Proof.
 unfold iff.
 split; intros.
 - (* => *)
-induction t.
+induction t; simpl.
 (* Base case *)
-simpl.
 intuition.
 (* Step case *)
-simpl.
-case (compare n0 a) eqn:Heqe1.
+case (compare n0 a) eqn:Heqe1; simpl.
 (* Current node *)
-simpl.
-case (compare n0 n) eqn:Heqe2.
-apply nat_compare_eq in Heqe2.
-intuition.
-apply nat_compare_lt in Heqe2.
-intuition.
-apply nat_compare_eq in Heqe1.
-intuition.
-simpl in H.
-destruct H.
-simpl in H.
-destruct H.
-intuition.
-destruct H.
-right.
-left.
-trivial.
-right.
-right.
-trivial.
-intuition.
-right.
-left.
-apply nat_compare_gt in Heqe2.
-apply nat_compare_eq in Heqe1.
-lia.
++ case (compare n0 n) eqn:Heqe2.
+  apply nat_compare_eq in Heqe2.
+  intuition.
+  apply nat_compare_lt in Heqe2.
+  intuition.
+  apply nat_compare_eq in Heqe1.
+  intuition.
+  simpl in H.
+  destruct H.
+  simpl in H.
+  destruct H.
+  intuition.
+  destruct H.
+  right.
+  left.
+  trivial.
+  right.
+  right.
+  trivial.
+  intuition.
+  right.
+  left.
+  apply nat_compare_gt in Heqe2.
+  apply nat_compare_eq in Heqe1.
+  lia.
 (* Right subtree (greater) *)
-simpl.
-case (compare n0 n) eqn:Heqe2.
-intuition.
-apply nat_compare_eq in Heqe2.
-left.
-trivial.
-destruct H.
-simpl in H.
-intuition.
-right.
-right.
-apply IHt2.
-right.
-trivial.
-intuition.
-simpl in H0.
-intuition.
++ case (compare n0 n) eqn:Heqe2.
+  intuition.
+  apply nat_compare_eq in Heqe2.
+  left.
+  trivial.
+  destruct H.
+  simpl in H.
+  intuition.
+  right.
+  right.
+  apply IHt2.
+  right.
+  trivial.
+  intuition.
+  simpl in H0.
+  intuition.
 (* Left subtree (less) *)
-simpl.
-case (compare n0 n) eqn:Heqe2.
-intuition.
-apply nat_compare_eq in Heqe2.
-left.
-trivial.
-destruct H.
-simpl in H.
-intuition.
-right.
-left.
-apply IHt1.
-right.
-trivial.
-intuition.
-simpl in H0.
-intuition.
++ case (compare n0 n) eqn:Heqe2.
+  intuition.
+  apply nat_compare_eq in Heqe2.
+  left.
+  trivial.
+  destruct H.
+  simpl in H.
+  intuition.
+  right.
+  left.
+  apply IHt1.
+  right.
+  trivial.
+  intuition.
+  simpl in H0.
+  intuition.
 - (* <= *)
-induction t.
+induction t; simpl in H.
 (* Base case *)
-simpl in H.
 intuition.
 (* Step case *)
-simpl in H.
-case (compare n0 a) eqn:Heqe1 in H.
-simpl in H.
-case (compare n0 n) eqn:Heqe2 in H.
-right.
-apply nat_compare_eq in Heqe1.
-apply nat_compare_eq in Heqe2.
-lia.
-
-left.
-simpl.
-trivial.
-left.
-simpl.
-trivial.
-simpl in H.
-case (compare n0 n) eqn:Heqe2 in H.
-left.
-simpl.
-apply nat_compare_eq in Heqe2.
-left.
-trivial.
-intuition.
-
-apply nat_compare_lt in Heqe2.
-intuition. (* contradiction *)
-
-left.
-simpl.
-right.
-left.
-trivial.
-
-left.
-simpl.
-right.
-right.
-trivial.
-
-left.
-simpl.
-intuition.
-apply nat_compare_lt in Heqe1.
-apply nat_compare_gt in Heqe2.
-intuition. (* contradiction *)
-
-simpl in H.
-case (compare n0 n) eqn:Heqe2 in H.
-left.
-simpl.
-apply nat_compare_eq in Heqe2.
-left.
-trivial.
-destruct H.
-apply nat_compare_lt in Heqe2.
-intuition.
-destruct H.
-destruct IHt1.
-apply H.
-left.
-simpl.
-apply nat_compare_lt in Heqe2.
-right.
-left.
-apply H0.
-right.
-apply H0.
-left.
-simpl.
-apply nat_compare_lt in Heqe2.
-right.
-right.
-apply H.
-destruct H.
-apply nat_compare_gt in Heqe2.
-intuition. (* contradiction *)
-destruct H.
-destruct IHt1.
-apply H.
-left.
-simpl.
-right.
-intuition.
-intuition.
-left.
-simpl.
-right.
-right.
-apply H.
+case (compare n0 a) eqn:Heqe1 in H; simpl in H.
++ case (compare n0 n) eqn:Heqe2 in H.
+  right.
+  apply nat_compare_eq in Heqe1.
+  apply nat_compare_eq in Heqe2.
+  lia.
+  left.
+  simpl.
+  trivial.
+  left.
+  simpl.
+  trivial.
++ case (compare n0 n) eqn:Heqe2 in H.
+  * left.
+    simpl.
+    apply nat_compare_eq in Heqe2.
+    left.
+    trivial.
+  * intuition.
+    apply nat_compare_lt in Heqe2.
+    intuition.
+    left.
+    simpl.
+    right.
+    left.
+    trivial.
+    left.
+    simpl.
+    right.
+    right.
+    trivial.
+  * left.
+    simpl.
+    intuition.
+    apply nat_compare_lt in Heqe1.
+    apply nat_compare_gt in Heqe2.
+    intuition.
++ case (compare n0 n) eqn:Heqe2 in H.
+  * left.
+    simpl.
+    apply nat_compare_eq in Heqe2.
+    left.
+    trivial.
+  * destruct H.
+    apply nat_compare_lt in Heqe2.
+    intuition.
+    destruct H. destruct IHt1.
+    apply H.
+    left.
+    simpl.
+    apply nat_compare_lt in Heqe2.
+    right.
+    left.
+    apply H0.
+    right.
+    apply H0.
+    left.
+    simpl.
+    apply nat_compare_lt in Heqe2.
+    intuition.
+  * destruct H.
+    apply nat_compare_gt in Heqe2.
+    intuition.
+    destruct H. destruct IHt1.
+    apply H.
+    left.
+    simpl.
+    right.
+    intuition.
+    intuition.
+    left.
+    simpl.
+    intuition.
 Qed.
 
 
